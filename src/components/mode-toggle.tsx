@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { Sun, Moon, Computer } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/theme-provider"
@@ -7,7 +6,6 @@ const modes: Array<"light" | "dark" | "system"> = ["light", "dark", "system"]
 
 export function ModeToggle() {
   const { theme, setTheme } = useTheme()
-  const [open, setOpen] = useState(false)
 
   function cycle() {
     const i = modes.indexOf(theme as any)
