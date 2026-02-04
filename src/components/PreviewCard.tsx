@@ -91,13 +91,12 @@ export function PreviewCard({
         <CardAction>
           <ModeToggle />
         </CardAction>
-        <CardDescription>Review parsed data, edit metadata fields, and convert to PDF.</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">
         {/* progress bar removed: skeleton rows indicate loading */}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 shadow-md p-4 rounded-lg bg-muted-foreground/5">
           <div className="space-y-2">
             <Label htmlFor="pdf-artist">Artist</Label>
             <Input
@@ -186,7 +185,7 @@ export function PreviewCard({
             <Label htmlFor="pdf-engineer-name">Mastering Engineer Name</Label>
             <Input
               id="pdf-engineer-name"
-              placeholder="Name (e.g., Taylor Deupree)"
+              placeholder="Name"
               value={metadata.masteringEngineerName ?? metadata.masteringEngineer ?? ""}
               onChange={(e) => onMetadataChange({ ...metadata, masteringEngineerName: e.target.value })}
             />
@@ -196,7 +195,7 @@ export function PreviewCard({
             <Label htmlFor="pdf-engineer-email">Mastering Engineer Email</Label>
             <Input
               id="pdf-engineer-email"
-              placeholder="Email (e.g., taylor@domain.com)"
+              placeholder="Email"
               value={metadata.masteringEngineerEmail ?? ""}
               onChange={(e) => onMetadataChange({ ...metadata, masteringEngineerEmail: e.target.value })}
             />

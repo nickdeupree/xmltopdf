@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Undo2, FileUp } from "lucide-react"
+import { Undo2, FileUp, Plus } from "lucide-react"
 import { ModeToggle } from "@/components/mode-toggle"
 
 export function formatBytes(bytes: number) {
@@ -49,33 +49,35 @@ export function UploadCard({
 
         <div className="space-y-2">
           <Label>File Upload</Label>
-          <div className={`flex w-full items-center gap-2 p-2 rounded`}>
-            <Input
-              ref={fileInputRef}
-              type="file"
-              accept=".csv, .xml"
-              className="cursor-pointer bg-transparent"
-              onChange={onFileChange}
-            />
+          <div className={`flex w-full items-center gap-2 p-2 rounded-lg shadow-md bg-background/50`}>
+            <div className="relative flex-1 ">
+              {/* Invisible native input that covers the full area so clicks open the file picker */}
+              <Input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv, .xml"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                onChange={onFileChange}
+              />
+
+              {/* Visible filename / placeholder area driven by `file` prop */}
+              <div className="h-9 flex items-center px-3 ">
+                <Label className="truncate text-sm text-muted-foreground" title={file?.name ?? "Upload a file"}>
+                  {file ? file.name : "Upload a file"}
+                </Label>
+              </div>
+            </div>
 
             <Button
               variant="outline"
               size="icon"
-              title="Undo / Remove File"
-              onClick={onClearFile}
-              disabled={!file}
+              title={file ? "Undo / Remove File" : "Upload file"}
+              onClick={file ? onClearFile : () => fileInputRef.current?.click()}
+              disabled={loading}
             >
-              <Undo2 className="h-4 w-4" />
+              {file ? <Undo2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
             </Button>
           </div>
-
-          {file ? (
-            <div className="text-sm text-muted-foreground mt-1">
-              Selected: <span className="font-medium">{file.name}</span> • {formatBytes(file.size)}
-            </div>
-          ) : (
-            <div className="text-sm text-muted-foreground mt-1">Drag a .csv or .xml file here, or click to select.</div>
-          )}
         </div>
 
         {loading && (
@@ -88,6 +90,7 @@ export function UploadCard({
 
       <CardFooter>
         <Button
+          variant="default"
           className="w-full"
           disabled={!file || loading}
           title={!file ? "Select a file to enable" : "Parse file and preview"}

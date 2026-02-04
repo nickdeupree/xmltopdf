@@ -1,6 +1,6 @@
 import React from "react"
 import { Document, Page, View, Text, Image, StyleSheet, pdf } from "@react-pdf/renderer"
-import logoJpg from "../assets/logo.jpg"
+import logoPng from "../assets/logo.png"
 
 // For specific bolding, we'll use fontWeight 'bold' or numeric values.
 
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0, 
   },
   logo: {
-    width: 1  50, 
+    width: "190px", 
     height: "auto",
     objectFit: "contain"
   },
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   // Metadata Section
   metaContainer: {
-    marginBottom: 15,
+    marginBottom: 0,
   },
   metaSeparator: {
     borderBottomWidth: 1, 
@@ -86,7 +86,6 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   metaLabel: {
-    width: 100,
     fontWeight: "bold", 
     color: "#444" 
   },
@@ -95,8 +94,7 @@ const styles = StyleSheet.create({
   },
   // Vinyl Specific
   vinylSection: {
-    marginTop: 10,
-    marginBottom: 5,
+    marginBottom: 10,
   },
   vinylHeader: {
     fontSize: 10,
@@ -267,7 +265,7 @@ export const MyPdfDocument: React.FC<PdfProps> = ({ data, metadata }) => {
                 <View style={styles.topHeaderContainer}>
                 <View>
                   {/* Logo - Force logo.jpg as requested */}
-                  <Image src={logoJpg} style={styles.logo} />
+                  <Image src={logoPng} style={styles.logo} />
 
                   {/* Mastering Engineer Info under the logo */}
                   <Text style={[styles.masteringInfo, { textAlign: "left", marginTop: 5 }]}>
@@ -292,15 +290,22 @@ export const MyPdfDocument: React.FC<PdfProps> = ({ data, metadata }) => {
 
                 <View style={{marginTop: 5}}>
                     <View style={styles.metaRow}>
-                        <Text style={styles.metaLabel}>Client:</Text>
+                        <Text style={styles.metaLabel}>Client: </Text>
                         <Text style={styles.metaValue}>{metadata.client}</Text>
                     </View>
                     
                     <View style={styles.metaSeparator} />
 
                     <View style={styles.metaRow}>
-                        <Text style={styles.metaLabel}>Catalog # / Label:</Text>
+                        <Text style={styles.metaLabel}>Catalog # / Label: </Text>
                         <Text style={styles.metaValue}>{metadata.catalog}</Text>
+                    </View>
+                    
+                    <View style={styles.metaSeparator} />
+
+                    <View style={styles.metaRow}>
+                        <Text style={styles.metaLabel}>Date: </Text>
+                        <Text style={styles.metaValue}>{metadata.date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</Text>
                     </View>
                 </View>
               </View>
