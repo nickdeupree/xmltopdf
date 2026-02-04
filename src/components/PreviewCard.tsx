@@ -28,8 +28,8 @@ const pageSize = 5
 
 interface PreviewCardProps {
   data: Array<Record<string, any>> | null
-  metadata: { title?: string; subtitle?: string }
-  onMetadataChange: (metadata: { title?: string; subtitle?: string }) => void
+  metadata: Record<string, any>
+  onMetadataChange: (metadata: Record<string, any>) => void
   loadedCount: number
   onLoadMore: (page: number) => Promise<void>
   paginationLoading: boolean
@@ -71,7 +71,7 @@ export function PreviewCard({
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      const name = `${(metadata?.title ?? "report").replace(/[^a-z0-9-_]/gi, "_")}-${new Date().toISOString().slice(0,10)}.pdf`
+      const name = `${(metadata?.albumTitle ?? metadata?.title ?? "report").replace(/[^a-z0-9-_]/gi, "_")}-${new Date().toISOString().slice(0,10)}.pdf`
       a.download = name
       document.body.appendChild(a)
       a.click()
@@ -91,7 +91,7 @@ export function PreviewCard({
         <CardAction>
           <ModeToggle />
         </CardAction>
-        <CardDescription>Review parsed data, edit title/subtitle, and convert to PDF.</CardDescription>
+        <CardDescription>Review parsed data, edit metadata fields, and convert to PDF.</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -99,22 +99,106 @@ export function PreviewCard({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="pdf-title">Title</Label>
+            <Label htmlFor="pdf-artist">Artist</Label>
             <Input
-              id="pdf-title"
-              placeholder="Report Title"
-              value={metadata.title ?? ""}
-              onChange={(e) => onMetadataChange({ ...metadata, title: e.target.value })}
+              id="pdf-artist"
+              placeholder="Artist Name"
+              value={metadata.artist ?? ""}
+              onChange={(e) => onMetadataChange({ ...metadata, artist: e.target.value })}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="pdf-subtitle">Subtitle</Label>
+            <Label htmlFor="pdf-album">Album Title</Label>
             <Input
-              id="pdf-subtitle"
-              placeholder="Report Subtitle"
-              value={metadata.subtitle ?? ""}
-              onChange={(e) => onMetadataChange({ ...metadata, subtitle: e.target.value })}
+              id="pdf-album"
+              placeholder="Album Title"
+              value={metadata.albumTitle ?? metadata.title ?? ""}
+              onChange={(e) => onMetadataChange({ ...metadata, albumTitle: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="pdf-client">Client</Label>
+            <Input
+              id="pdf-client"
+              placeholder="Client Name"
+              value={metadata.client ?? ""}
+              onChange={(e) => onMetadataChange({ ...metadata, client: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="pdf-catalog">Catalog # / Label</Label>
+            <Input
+              id="pdf-catalog"
+              placeholder="Catalog Number"
+              value={metadata.catalog ?? ""}
+              onChange={(e) => onMetadataChange({ ...metadata, catalog: e.target.value })}
+            />
+          </div>
+
+          {(metadata.vinylSide || metadata.bits || metadata.sampleRate || metadata.perSideNote) && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="pdf-side">Vinyl Side</Label>
+                <Input
+                  id="pdf-side"
+                  placeholder="Side (e.g., A, B)"
+                  value={metadata.vinylSide ?? ""}
+                  onChange={(e) => onMetadataChange({ ...metadata, vinylSide: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pdf-bits">Bits</Label>
+                <Input
+                  id="pdf-bits"
+                  placeholder="e.g., 24bit"
+                  value={metadata.bits ?? ""}
+                  onChange={(e) => onMetadataChange({ ...metadata, bits: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pdf-samplerate">Sample Rate</Label>
+                <Input
+                  id="pdf-samplerate"
+                  placeholder="e.g., 48khz"
+                  value={metadata.sampleRate ?? ""}
+                  onChange={(e) => onMetadataChange({ ...metadata, sampleRate: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pdf-perside">Per-Side Note</Label>
+                <Input
+                  id="pdf-perside"
+                  placeholder="e.g., Single WAV file per vinyl side"
+                  value={metadata.perSideNote ?? ""}
+                  onChange={(e) => onMetadataChange({ ...metadata, perSideNote: e.target.value })}
+                />
+              </div>
+            </>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="pdf-engineer-name">Mastering Engineer Name</Label>
+            <Input
+              id="pdf-engineer-name"
+              placeholder="Name (e.g., Taylor Deupree)"
+              value={metadata.masteringEngineerName ?? metadata.masteringEngineer ?? ""}
+              onChange={(e) => onMetadataChange({ ...metadata, masteringEngineerName: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="pdf-engineer-email">Mastering Engineer Email</Label>
+            <Input
+              id="pdf-engineer-email"
+              placeholder="Email (e.g., taylor@domain.com)"
+              value={metadata.masteringEngineerEmail ?? ""}
+              onChange={(e) => onMetadataChange({ ...metadata, masteringEngineerEmail: e.target.value })}
             />
           </div>
         </div>
@@ -132,27 +216,48 @@ export function PreviewCard({
                 </TableHeader>
 
                 <TableBody>
-                  {paginationLoading ? (
-                    // show 5 skeleton rows
-                    Array.from({ length: pageSize }).map((_, i) => (
-                      <TableRow key={i}>
-                        {(Object.keys(data[0] ?? {}) || []).map((col) => (
-                          <TableCell key={col}>
-                            <Skeleton className="h-4 w-24" />
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  ) : (
+                  {(() => {
+                    const cols = (Object.keys(data[0] ?? {}) || [])
+
+                    if (paginationLoading) {
+                      // show 5 skeleton rows while loading
+                      return Array.from({ length: pageSize }).map((_, i) => (
+                        <TableRow key={`skeleton-${i}`}>
+                          {cols.map((col) => (
+                            <TableCell key={col}>
+                              <Skeleton className="h-4 w-24" />
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    }
+
                     // compute visible rows from loadedCount and page
-                    data.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize).map((row, ri) => (
-                      <TableRow key={ri}>
-                        {(Object.keys(data[0] ?? {}) || []).map((col) => (
-                          <TableCell key={col}>{row[col] ?? ""}</TableCell>
+                    const start = (page - 1) * pageSize
+                    const visible = data.slice(start, start + pageSize)
+                    const blanks = Math.max(0, pageSize - visible.length)
+
+                    return (
+                      <>
+                        {visible.map((row, ri) => (
+                          <TableRow key={`row-${ri}`}>
+                            {cols.map((col) => (
+                              <TableCell key={col}>{row[col] ?? ""}</TableCell>
+                            ))}
+                          </TableRow>
                         ))}
-                      </TableRow>
-                    ))
-                  )}
+
+                        {/* append blank rows so the table always shows `pageSize` rows */}
+                        {Array.from({ length: blanks }).map((_, bi) => (
+                          <TableRow key={`blank-${bi}`}>
+                            {cols.map((col) => (
+                              <TableCell key={col}>&nbsp;</TableCell>
+                            ))}
+                          </TableRow>
+                        ))}
+                      </>
+                    )
+                  })()}
                 </TableBody>
               </Table>
 

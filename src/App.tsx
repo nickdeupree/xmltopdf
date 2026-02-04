@@ -46,14 +46,26 @@ function App() {
   }, [])
 
   const handleLoadMore = useCallback(
-    async () => {
+    async (page?: number) => {
+      const pageSize = 10
+      const required = (page ?? 0) * pageSize
+      
+      // Check if we already have the data
+      if (required <= loadedCount) {
+        // Data already available, no need to load or show skeleton
+        return
+      }
+
       setPaginationLoading(true)
-      await new Promise((res) => setTimeout(res, 400))
-      setLoadedCount((prev) => Math.min((data?.length || 0), prev + 10))
-      await new Promise((res) => setTimeout(res, 200))
+
+      setLoadedCount((prev) => {
+        const target = Math.max(prev + 50, required)
+        return Math.min((data?.length || 0), target)
+      })
+
       setPaginationLoading(false)
     },
-    [data?.length, setLoadedCount]
+    [data?.length, loadedCount, setLoadedCount]
   )
 
   return (
