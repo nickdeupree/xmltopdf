@@ -21,7 +21,6 @@ function App() {
   // Parsing and data management
   const {
     loading,
-    progress: parseProgress,
     data,
     metadata,
     setMetadata,
@@ -85,7 +84,6 @@ function App() {
           <UploadCard
             file={file}
             loading={loading}
-            progress={parseProgress}
             onFileChange={onFileChange}
             onClearFile={handleClearFile}
             onParse={handleParse}

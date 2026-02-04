@@ -4,7 +4,6 @@ import XMLParser from "react-xml-parser"
 
 export function useFileParsing() {
   const [loading, setLoading] = useState(false)
-  const [progress, setProgress] = useState(0)
   const [data, setData] = useState<Array<Record<string, any>> | null>(null)
   type FileMetadata = {
     title?: string
@@ -31,10 +30,8 @@ export function useFileParsing() {
   const parseFile = useCallback(async (file: File | null) => {
     if (!file) return
     setLoading(true)
-    setProgress(10)
     try {
       const text = await file.text()
-      setProgress(40)
       if (file.name.toLowerCase().endsWith(".csv")) {
         const result = Papa.parse(text, {
           header: true,
@@ -198,7 +195,6 @@ export function useFileParsing() {
           setLoadedCount(Math.min(50, tracks.length))
         } else {
           // Fallback: generic XML parsing for other formats
-          const metaNode = xml.getElementsByTagName("metadata")[0]
           const records = xml.children
             .filter((c: any) => c.name !== "metadata")
             .map((r: any) => {
@@ -213,7 +209,6 @@ export function useFileParsing() {
         }
       }
 
-      setProgress(100)
       // small delay so user sees progress and skeleton
       await new Promise((res) => setTimeout(res, 250))
     } catch (err) {
@@ -221,7 +216,6 @@ export function useFileParsing() {
       alert("Failed to parse file. Ensure it is well-formed CSV or XML.")
     } finally {
       setLoading(false)
-      setProgress(0)
     }
   }, [])
 
@@ -233,7 +227,6 @@ export function useFileParsing() {
 
   return {
     loading,
-    progress,
     data,
     setData,
     metadata,

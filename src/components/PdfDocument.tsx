@@ -237,7 +237,7 @@ export const MyPdfDocument: React.FC<PdfProps> = ({ data, metadata }) => {
 
   // Pagination Logic: first page 25 rows for vinyl, 30 for non-vinyl; subsequent pages 50 rows
   const FIRST_PAGE_ITEMS = isVinyl ? 25 : 30;
-  const SUBSEQUENT_ITEMS = 50;
+  const SUBSEQUENT_ITEMS = 40;
   const pages = [];
   if (data.length === 0) {
     pages.push([]);

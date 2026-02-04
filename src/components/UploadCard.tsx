@@ -2,8 +2,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Progress } from "@/components/ui/progress"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Undo2, FileUp, Plus } from "lucide-react"
 import { ModeToggle } from "@/components/mode-toggle"
 
@@ -18,7 +16,6 @@ export function formatBytes(bytes: number) {
 interface UploadCardProps {
   file: File | null
   loading: boolean
-  progress: number
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onClearFile: () => void
   onParse: () => void
@@ -28,14 +25,13 @@ interface UploadCardProps {
 export function UploadCard({
   file,
   loading,
-  progress,
   onFileChange,
   onClearFile,
   onParse,
   fileInputRef,
 }: UploadCardProps) {
   return (
-    <Card className="w-full max-w-md bg-card text-card-foreground">
+    <Card className="w-full max-w-md bg-card text-card-foreground relative overflow-hidden">
       <CardHeader>
         <CardTitle>XML/CSV to PDF</CardTitle>
         <CardAction>
@@ -45,7 +41,6 @@ export function UploadCard({
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {loading && <Progress value={progress} />}
 
         <div className="space-y-2">
           <Label>File Upload</Label>
@@ -61,11 +56,11 @@ export function UploadCard({
               />
 
               {/* Visible filename / placeholder area driven by `file` prop */}
-              <div className="h-9 flex items-center px-3 ">
-                <Label className="truncate text-sm text-muted-foreground" title={file?.name ?? "Upload a file"}>
+                <div className="h-9 flex items-center px-3 ">
+                <Label className={`truncate text-sm ${file ? 'text-foreground' : 'text-muted-foreground'}`} title={file?.name ?? "Upload a file"}>
                   {file ? file.name : "Upload a file"}
                 </Label>
-              </div>
+                </div>
             </div>
 
             <Button
@@ -79,16 +74,9 @@ export function UploadCard({
             </Button>
           </div>
         </div>
-
-        {loading && (
-          <div className="space-y-2">
-            <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-6 w-full" />
-          </div>
-        )}
       </CardContent>
 
-      <CardFooter>
+      <CardFooter className="flex flex-col gap-2 pb-4">
         <Button
           variant="default"
           className="w-full"

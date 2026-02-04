@@ -14,7 +14,7 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
       role="navigation"
       aria-label="pagination"
       data-slot="pagination"
-      className={cn("mx-auto flex w-full justify-center", className)}
+      className={cn("mx-auto w-full overflow-x-auto px-2", className)}
       {...props}
     />
   )
@@ -27,7 +27,7 @@ function PaginationContent({
   return (
     <ul
       data-slot="pagination-content"
-      className={cn("flex flex-row items-center gap-1", className)}
+      className={cn("flex flex-row items-center justify-center gap-1 whitespace-nowrap overflow-hidden", className)}
       {...props}
     />
   )
@@ -101,13 +101,33 @@ function PaginationNext({
 
 function PaginationEllipsis({
   className,
+  onClick,
   ...props
-}: React.ComponentProps<"span">) {
+}: React.ComponentProps<"span"> & { onClick?: () => void }) {
+  const commonClass = cn(buttonVariants({ variant: "ghost", size: "icon" }), className)
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        data-slot="pagination-ellipsis"
+        aria-label={props["aria-label"] as string | undefined}
+        className={commonClass}
+        onClick={onClick}
+        {...(props as any)}
+      >
+        <MoreHorizontalIcon className="size-4" />
+        <span className="sr-only">More pages</span>
+      </button>
+    )
+  }
+
   return (
     <span
       aria-hidden
       data-slot="pagination-ellipsis"
-      className={cn("flex size-9 items-center justify-center", className)}
+      // use the same button classes as a ghost icon button so the ellipsis matches page buttons
+      className={cn(commonClass, "pointer-events-none")}
       {...props}
     >
       <MoreHorizontalIcon className="size-4" />

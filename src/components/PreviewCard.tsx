@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, CardAction } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardAction } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,14 +12,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationPrevious,
-  PaginationNext,
-} from "@/components/ui/pagination"
+import { PaginationButtons } from "@/components/pagination-buttons"
 import { ModeToggle } from "@/components/mode-toggle"
 import logoUrl from "@/assets/logo.png"
 import { createPdfBlob } from "./PdfDocument"
@@ -96,7 +89,7 @@ export function PreviewCard({
       <CardContent className="space-y-4">
         {/* progress bar removed: skeleton rows indicate loading */}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 shadow-md p-4 rounded-lg bg-muted-foreground/5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 shadow-md p-4 rounded-lg bg-background/50">
           <div className="space-y-2">
             <Label htmlFor="pdf-artist">Artist</Label>
             <Input
@@ -261,38 +254,12 @@ export function PreviewCard({
               </Table>
 
               <div className="mt-4">
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        onClick={() => goToPage(Math.max(1, page - 1))}
-                        aria-disabled={page === 1}
-                      />
-                    </PaginationItem>
-
-                    {/* page numbers */}
-                    {Array.from({ length: totalPages }).map((_, i) => {
-                      const p = i + 1
-                      return (
-                        <PaginationItem key={p}>
-                          <PaginationLink
-                            isActive={p === page}
-                            onClick={() => goToPage(p)}
-                          >
-                            {p}
-                          </PaginationLink>
-                        </PaginationItem>
-                      )
-                    })}
-
-                    <PaginationItem>
-                      <PaginationNext
-                        onClick={() => goToPage(Math.min(totalPages, page + 1))}
-                        aria-disabled={page === totalPages}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
+                <PaginationButtons
+                  page={page}
+                  totalPages={totalPages}
+                  onPageChange={goToPage}
+                  isLoading={paginationLoading}
+                />
               </div>
             </>
           ) : (
