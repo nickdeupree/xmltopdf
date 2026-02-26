@@ -318,11 +318,17 @@ export const MyPdfDocument: React.FC<PdfProps> = ({ data, metadata }) => {
                 <View style={styles.vinylSection}>
                   <Text style={styles.vinylHeader}>Vinyl Side {metadata.vinylSide}</Text>
                   <Text style={styles.vinylText}>
-                      {[metadata.bits, metadata.sampleRate].filter(Boolean).join(" / ") || "24 bit / 48khz WAV"}
+                      Bit Depth: {metadata.bits ? String(metadata.bits).match(/^(\d+)/)?.[1] : "24"}
                   </Text>
-                  <Text style={styles.vinylText}>
+                    <Text style={styles.vinylText}>
+                      Sample Rate: {metadata.sampleRate ? `${metadata.sampleRate} khz` : "48 khz"}
+                    </Text>
+                    
+                    <Text style={styles.vinylText}>{"\n"}</Text>
+                    
+                    <Text style={styles.vinylText}>
                       {metadata.perSideNote || "single file per vinyl side"}
-                  </Text>
+                    </Text>
                 </View>
               )}
             </>
