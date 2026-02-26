@@ -96,7 +96,7 @@ export function useFileParsing() {
               parsedMeta.vinylSide = val || "A"
             }
 
-            const bitsMatch = line.match(/(\d+)\s*bit\s*\/\s*(\d+)\s*khz/i)
+            const bitsMatch = line.match(/(\d+)\s*bit\s*\/\s*(\d+(?:\.\d+)?)\s*khz/i)
             if (bitsMatch) {
               parsedMeta.bits = bitsMatch[1] + "bit"
               parsedMeta.sampleRate = bitsMatch[2] + "khz"
