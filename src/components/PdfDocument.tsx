@@ -219,6 +219,10 @@ export const MyPdfDocument: React.FC<PdfProps> = ({ data, metadata }) => {
   // Determine if Vinyl Mode
   const isVinyl = !!metadata.vinylSide;
 
+  const vinylHeaderLabel = metadata.vinylSideLabel
+    ? `${metadata.vinylSideLabel}${metadata.vinylSide ? ` ${metadata.vinylSide}` : ""}`
+    : `Vinyl Side ${metadata.vinylSide || ""}`
+
   // Adjust column widths based on Vinyl mode (no ISRC = more space for Title)
   const dynamicTitleWidth = isVinyl ? "62%" : "42%"
 
@@ -316,7 +320,7 @@ export const MyPdfDocument: React.FC<PdfProps> = ({ data, metadata }) => {
               {/* VINYL SPECIFIC METADATA (Conditional) */}
               {isVinyl && (
                 <View style={styles.vinylSection}>
-                  <Text style={styles.vinylHeader}>Vinyl Side {metadata.vinylSide}</Text>
+                  <Text style={styles.vinylHeader}>{vinylHeaderLabel}</Text>
                   <Text style={styles.vinylText}>
                       Bit Depth: {metadata.bits ? String(metadata.bits).match(/^(\d+)/)?.[1] : "24"}
                   </Text>

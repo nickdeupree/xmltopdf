@@ -13,6 +13,7 @@ export function useFileParsing() {
     client?: string
     catalog?: string
     vinylSide?: string
+    vinylSideLabel?: string
     bits?: string
     sampleRate?: string
     perSideNote?: string
@@ -90,10 +91,12 @@ export function useFileParsing() {
               if (val) parsedMeta.albumTitle = val
             }
 
-            const sideMatch = line.match(/^VINYL\s+SIDE\s*([A-Z0-9-]+)?/i)
+            const sideMatch = line.match(/^(?:(VINYL|CASSETTE))\s+SIDE\s*([A-Z0-9-]+)?/i)
             if (sideMatch) {
-              const val = (sideMatch[1] || "").trim()
+              const kind = (sideMatch[1] || "").toUpperCase()
+              const val = (sideMatch[2] || "").trim()
               parsedMeta.vinylSide = val || "A"
+              parsedMeta.vinylSideLabel = kind === "CASSETTE" ? "CASSETTE SIDE" : "VINYL SIDE"
             }
 
             const bitsMatch = line.match(/(\d+)\s*bit\s*\/\s*(\d+(?:\.\d+)?)\s*khz/i)
