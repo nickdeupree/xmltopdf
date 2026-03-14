@@ -325,7 +325,7 @@ export const MyPdfDocument: React.FC<PdfProps> = ({ data, metadata }) => {
                       Bit Depth: {metadata.bits ? String(metadata.bits).match(/^(\d+)/)?.[1] : "24"}
                   </Text>
                     <Text style={styles.vinylText}>
-                      Sample Rate: {metadata.sampleRate ? `${metadata.sampleRate} khz` : "48 khz"}
+                      Sample Rate: {metadata.sampleRate ? `${metadata.sampleRate}` : "48 khz"}
                     </Text>
                     
                     <Text style={styles.vinylText}>{"\n"}</Text>
