@@ -2,6 +2,16 @@ import { useCallback, useState } from "react"
 import Papa from "papaparse"
 import XMLParser from "react-xml-parser"
 
+const decodeXmlEntities = (value: any) => {
+  if (value == null) return value
+  return String(value)
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+}
+
 export function useFileParsing() {
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState<Array<Record<string, any>> | null>(null)
@@ -56,7 +66,7 @@ export function useFileParsing() {
         if (customTextNode) {
           // Find the CustomText content in original XML
           const customTextMatch = text.match(/<CustomText>([\s\S]*?)<\/CustomText>/i)
-          customText = customTextMatch ? customTextMatch[1] : (customTextNode.value || "")
+          customText = decodeXmlEntities(customTextMatch ? customTextMatch[1] : (customTextNode.value || ""))
         }
         
         if (customText) {
@@ -69,32 +79,32 @@ export function useFileParsing() {
 
             const clientMatch = line.match(/^Client:\s*(.*)$/i)
             if (clientMatch) {
-              const val = clientMatch[1].trim()
+              const val = decodeXmlEntities(clientMatch[1].trim())
               if (val) parsedMeta.client = val
             }
 
             const catMatch = line.match(/^(Cat\. No|Cat No|Catalog #|Catalog):\s*(.*)$/i)
             if (catMatch) {
-              const val = catMatch[2].trim()
+              const val = decodeXmlEntities(catMatch[2].trim())
               if (val) parsedMeta.catalog = val
             }
 
             const artistMatch = line.match(/^Artist:\s*(.*)$/i)
             if (artistMatch) {
-              const val = artistMatch[1].trim()
+              const val = decodeXmlEntities(artistMatch[1].trim())
               if (val) parsedMeta.artist = val
             }
 
             const titleMatch = line.match(/^Title:\s*(.*)$/i)
             if (titleMatch) {
-              const val = titleMatch[1].trim()
+              const val = decodeXmlEntities(titleMatch[1].trim())
               if (val) parsedMeta.albumTitle = val
             }
 
             const sideMatch = line.match(/^(?:(VINYL|CASSETTE))\s+SIDE\s*([A-Z0-9-]+)?/i)
             if (sideMatch) {
               const kind = (sideMatch[1] || "").toUpperCase()
-              const val = (sideMatch[2] || "").trim()
+              const val = decodeXmlEntities((sideMatch[2] || "").trim())
               parsedMeta.vinylSide = val || "A"
               parsedMeta.vinylSideLabel = kind === "CASSETTE" ? "CASSETTE SIDE" : "VINYL SIDE"
             }
@@ -111,7 +121,7 @@ export function useFileParsing() {
 
             const engineerMatch = line.match(/^(?:mastering(?:\s+engineer)?|mastered by|mastering):\s*(.*)$/i)
             if (engineerMatch) {
-              const val = engineerMatch[1].trim()
+              const val = decodeXmlEntities(engineerMatch[1].trim())
               if (val) {
                 parsedMeta.masteringEngineer = val
 
@@ -123,13 +133,13 @@ export function useFileParsing() {
                   let name = val.replace(emailMatch[0], "").replace(/\s*[\/:\-]\s*$/, "").trim()
                   if (!name) {
                     // fallback to text before a slash
-                    const parts = val.split("/").map((p) => p.trim()).filter(Boolean)
+                    const parts = val.split("/").map((p: string) => p.trim()).filter(Boolean)
                     name = parts[0] || ""
                   }
                   if (name) parsedMeta.masteringEngineerName = name
                 } else {
                   // If no email, split on '/' to see if format is 'Name / email' or 'Name / contact'
-                  const parts = val.split("/").map((p) => p.trim()).filter(Boolean)
+                  const parts = val.split("/").map((p: string) => p.trim()).filter(Boolean)
                   if (parts.length === 2 && /@/.test(parts[1])) {
                     parsedMeta.masteringEngineerName = parts[0]
                     parsedMeta.masteringEngineerEmail = parts[1]
@@ -146,17 +156,17 @@ export function useFileParsing() {
 
         // Fallback to generic <metadata> tags if present
         const metaNode = xml.getElementsByTagName("metadata")[0]
-        const title = metaNode?.getElementsByTagName("title")[0]?.value
-        const subtitle = metaNode?.getElementsByTagName("subtitle")[0]?.value
+        const title = decodeXmlEntities(metaNode?.getElementsByTagName("title")[0]?.value)
+        const subtitle = decodeXmlEntities(metaNode?.getElementsByTagName("subtitle")[0]?.value)
         if (title && !parsedMeta.albumTitle) parsedMeta.albumTitle = title
         if (subtitle) parsedMeta.subtitle = subtitle
 
         // Additional direct tags
-        const trackGroup = xml.getElementsByTagName("TrackGroup")[0]?.value
+        const trackGroup = decodeXmlEntities(xml.getElementsByTagName("TrackGroup")[0]?.value)
         if (trackGroup) parsedMeta.vinylSide = parsedMeta.vinylSide || trackGroup
-        const albumDuration = xml.getElementsByTagName("AlbumDuration")[0]?.value
+        const albumDuration = decodeXmlEntities(xml.getElementsByTagName("AlbumDuration")[0]?.value)
         if (albumDuration) parsedMeta.albumDuration = albumDuration
-        const groupDuration = xml.getElementsByTagName("GroupDuration")[0]?.value
+        const groupDuration = decodeXmlEntities(xml.getElementsByTagName("GroupDuration")[0]?.value)
         if (groupDuration) parsedMeta.groupDuration = groupDuration
 
         setMetadata(parsedMeta)
@@ -190,7 +200,7 @@ export function useFileParsing() {
           const tracks = cdTracksNode.children.map((t: any) => {
             const track: Record<string, any> = { ...(t.attributes || {}) }
             t.children.forEach((tc: any) => {
-              track[tc.name] = tc.name === "StartM" ? normalizeStartM(tc.value) : tc.value
+              track[tc.name] = tc.name === "StartM" ? normalizeStartM(tc.value) : decodeXmlEntities(tc.value)
             })
             return track
           })
@@ -203,7 +213,7 @@ export function useFileParsing() {
             .map((r: any) => {
               const obj: Record<string, any> = { ...(r.attributes || {}) }
               r.children.forEach((child: any) => {
-                obj[child.name] = child.name === "StartM" ? normalizeStartM(child.value) : child.value
+                obj[child.name] = child.name === "StartM" ? normalizeStartM(child.value) : decodeXmlEntities(child.value)
               })
               return obj
             })
